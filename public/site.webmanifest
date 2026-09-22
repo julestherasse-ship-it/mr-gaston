@@ -1,0 +1,27 @@
+{
+  "name": "Mr Gaston",
+  "short_name": "Mr Gaston",
+  "description": "Friterie artisanale à Mons : burgers, frites et snacks. Chaussée de Binche 141.",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
+  "display": "browser",
+  "background_color": "#141312",
+  "theme_color": "#141312",
+  "lang": "fr-BE",
+  "dir": "ltr",
+  "categories": ["food", "restaurants"],
+  "icons": [
+    {
+      "src": "/brand/favicon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
