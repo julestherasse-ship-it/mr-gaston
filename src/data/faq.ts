@@ -31,7 +31,7 @@ export const faqItems: FaqItem[] = [
     id: "carte",
     question: "Que propose la carte ?",
     answer:
-      "Burgers, menus, mitraillettes, snacks, frites, et une carte au bar. La commande en ligne reprend la carte du moment.",
+      "Burgers signatures, snacks, snacks du boucher, frites, sauces, suppléments, et une carte au bar. La commande en ligne reprend la carte du moment.",
   },
   {
     id: "sur-place",

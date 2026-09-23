@@ -1,4 +1,4 @@
-import { displayDescription, menuCategories, type MenuItem } from "@/data/menu";
+import { menuCategories, type MenuItem } from "@/data/menu";
 import { siteConfig } from "@/data/site";
 import { images } from "@/data/images";
 import SectionIndex from "@/components/ui/SectionIndex";
@@ -10,11 +10,48 @@ import MenuDishCard from "@/components/home/MenuDishCard";
 import MenuDishRow from "@/components/home/MenuDishRow";
 import MenuPortionCard from "@/components/home/MenuPortionCard";
 
-function splitItems(items: MenuItem[]) {
-  return {
-    photographed: items.filter((item) => item.image),
-    listed: items.filter((item) => !item.image),
-  };
+function BurgersBlock({ items }: { items: MenuItem[] }) {
+  const featured = items.find((item) => item.featured) ?? items[0];
+  const rest = featured ? items.filter((item) => item.id !== featured.id) : items;
+
+  type Run = { type: "photo" | "list"; items: MenuItem[] };
+  const runs: Run[] = [];
+  for (const item of rest) {
+    const type = item.image ? "photo" : "list";
+    const last = runs[runs.length - 1];
+    if (last && last.type === type) last.items.push(item);
+    else runs.push({ type, items: [item] });
+  }
+
+  return (
+    <>
+      {featured ? (
+        <div className="mb-10 md:mb-14">
+          <MenuDishCard item={featured} featured />
+        </div>
+      ) : null}
+      {runs.map((run, index) =>
+        run.type === "photo" ? (
+          <div
+            key={`photo-${run.items[0]?.id ?? index}`}
+            className={`grid grid-cols-1 gap-6 md:gap-8 mb-6 md:mb-10 ${
+              run.items.length > 1 ? "md:grid-cols-2" : ""
+            }`}
+          >
+            {run.items.map((item) => (
+              <MenuDishCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <ul key={`list-${run.items[0]?.id ?? index}`} className="mb-6 md:mb-10 last:mb-0">
+            {run.items.map((item) => (
+              <MenuDishRow key={item.id} item={item} />
+            ))}
+          </ul>
+        ),
+      )}
+    </>
+  );
 }
 
 export default function ServicesSection() {
@@ -46,16 +83,11 @@ export default function ServicesSection() {
       <div className="page-shell">
         <div className="space-y-20 md:space-y-28">
           {menuCategories.map((category) => {
-            const { photographed, listed } = splitItems(category.items);
-            const frites = category.id === "frites" ? listed.filter((item) => item.id.startsWith("f-")) : [];
-            const sauces = category.id === "frites" ? listed.filter((item) => item.id.startsWith("sa-")) : [];
-            const maisonSauces = sauces.filter((item) => Boolean(displayDescription(item.description) || item.tag));
-            const otherSauces = sauces.filter((item) => !displayDescription(item.description) && !item.tag);
-            const rows = category.id === "frites" ? [] : listed;
-            const burgerPhotos = category.id === "burgers";
+            const maisonSauces = category.id === "sauces" ? category.items.filter((item) => item.tag === "Maison") : [];
+            const otherSauces = category.id === "sauces" ? category.items.filter((item) => item.tag !== "Maison") : [];
 
             return (
-              <div key={category.id} id={`cat-${category.id}`}>
+              <div key={category.id} id={`cat-${category.id}`} className="scroll-mt-36 lg:scroll-mt-40">
                 <header className="mb-8 md:mb-12 max-w-2xl">
                   <h3 className="font-display text-[clamp(2rem,4.8vw,3.4rem)] mb-4">{category.label}</h3>
                   {category.intro ? <p className="body-copy text-cream/72">{category.intro}</p> : null}
@@ -73,57 +105,42 @@ export default function ServicesSection() {
                   </div>
                 ) : null}
 
-                {photographed.length > 0 ? (
-                  <div
-                    className={`grid grid-cols-1 gap-6 md:gap-8 mb-6 md:mb-10 ${
-                      burgerPhotos
-                        ? "lg:grid-cols-12 lg:items-stretch"
-                        : photographed.length > 1
-                          ? "md:grid-cols-2"
-                          : ""
-                    }`}
-                  >
-                    {photographed.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className={burgerPhotos ? (index === 0 ? "lg:col-span-7" : "lg:col-span-5") : ""}
-                      >
-                        <MenuDishCard
-                          item={item}
-                          featured={burgerPhotos && index === 0}
-                          pair={burgerPhotos && index === 1}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-
-                {rows.length > 0 ? (
-                  <ul>{rows.map((item) => <MenuDishRow key={item.id} item={item} />)}</ul>
-                ) : null}
-
-                {frites.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-12">
-                    {frites.map((item) => (
+                {category.id === "burgers" ? (
+                  <BurgersBlock items={category.items} />
+                ) : category.id === "frites" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                    {category.items.map((item) => (
                       <MenuPortionCard key={item.id} item={item} />
                     ))}
                   </div>
-                ) : null}
-
-                {maisonSauces.length > 0 ? (
-                  <div className="mb-4">
-                    <p className="eyebrow text-cream/62 mb-4">Sauces</p>
-                    <ul>{maisonSauces.map((item) => <MenuDishRow key={item.id} item={item} />)}</ul>
-                  </div>
-                ) : null}
-
-                {otherSauces.length > 0 ? (
+                ) : category.id === "sauces" ? (
+                  <>
+                    {maisonSauces.length > 0 ? (
+                      <div className="mb-8">
+                        <p className="eyebrow text-cream/62 mb-4">Sauces maison · 1,00 €</p>
+                        <ul>{maisonSauces.map((item) => <MenuDishRow key={item.id} item={item} />)}</ul>
+                      </div>
+                    ) : null}
+                    {otherSauces.length > 0 ? (
+                      <div>
+                        <p className="eyebrow text-cream/62 mb-4">Sauces classiques · 0,90 €</p>
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-10">
+                          {otherSauces.map((item) => (
+                            <MenuDishRow key={item.id} item={item} compact />
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </>
+                ) : category.id === "supplements" ? (
                   <ul className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-10">
-                    {otherSauces.map((item) => (
+                    {category.items.map((item) => (
                       <MenuDishRow key={item.id} item={item} compact />
                     ))}
                   </ul>
-                ) : null}
+                ) : (
+                  <ul>{category.items.map((item) => <MenuDishRow key={item.id} item={item} />)}</ul>
+                )}
               </div>
             );
           })}

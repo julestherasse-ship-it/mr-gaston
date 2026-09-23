@@ -21,13 +21,13 @@ function parsePrice(price: string) {
   return Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
-const foodCategoryIds = new Set(["burgers", "menus", "mitraillettes", "snacks", "frites"]);
+const foodCategoryIds = new Set(["burgers", "snacks", "boucher", "frites"]);
 
 const prices = menuCategories
   .filter((cat) => foodCategoryIds.has(cat.id))
   .flatMap((cat) => cat.items)
   .map((item) => parsePrice(item.price))
-  .filter((value): value is number => value !== undefined && value >= 3);
+  .filter((value): value is number => value !== undefined);
 
 const priceRange =
   prices.length > 0 ? `€${Math.min(...prices)}–€${Math.max(...prices)}` : undefined;
@@ -54,6 +54,18 @@ const menu = {
     ...(category.intro ? { description: category.intro } : {}),
     hasMenuItem: category.items.map((item) => {
       const description = displayDescription(item.description);
+      const formatOffers = item.formats
+        ?.map((format) => {
+          const value = parsePrice(format.price);
+          if (!value) return undefined;
+          return {
+            "@type": "Offer",
+            name: format.label,
+            price: value.toFixed(2),
+            priceCurrency: "EUR",
+          };
+        })
+        .filter((offer): offer is NonNullable<typeof offer> => Boolean(offer));
       const price = parsePrice(item.price);
       return {
         "@type": "MenuItem",
@@ -74,15 +86,17 @@ const menu = {
             }
           : {}),
         ...(item.vegetarian ? { suitableForDiet: "https://schema.org/VegetarianDiet" } : {}),
-        ...(price
-          ? {
-              offers: {
-                "@type": "Offer",
-                price: price.toFixed(2),
-                priceCurrency: "EUR",
-              },
-            }
-          : {}),
+        ...(formatOffers && formatOffers.length > 0
+          ? { offers: formatOffers }
+          : price
+            ? {
+                offers: {
+                  "@type": "Offer",
+                  price: price.toFixed(2),
+                  priceCurrency: "EUR",
+                },
+              }
+            : {}),
       };
     }),
   })),

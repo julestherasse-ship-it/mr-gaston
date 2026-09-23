@@ -1,20 +1,32 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 export type MenuCategory =
   | "burgers"
-  | "menus"
-  | "mitraillettes"
   | "snacks"
+  | "boucher"
   | "frites"
+  | "sauces"
+  | "supplements"
   | "bar";
+
+export interface MenuFormat {
+  label: string;
+  price: string;
+}
 
 export interface MenuItem {
   id: string;
   name: string;
   description: string;
   price: string;
+  formats?: MenuFormat[];
+  note?: string;
   tag?: string;
   vegetarian?: boolean;
   image?: string;
   imageAlt?: string;
+  featured?: boolean;
 }
 
 export interface MenuCategoryData {
@@ -24,359 +36,318 @@ export interface MenuCategoryData {
   items: MenuItem[];
 }
 
+const IMAGE_DIR = join(process.cwd(), "public", "images", "mr-gaston");
+
+function dishImage(stems: string[], alt: string): Pick<MenuItem, "image" | "imageAlt"> {
+  const extensions = [".webp", ".jpg", ".jpeg", ".png"];
+  for (const stem of stems) {
+    for (const ext of extensions) {
+      const filename = `${stem}${ext}`;
+      if (existsSync(join(IMAGE_DIR, filename))) {
+        return { image: `/images/mr-gaston/${filename}`, imageAlt: alt };
+      }
+    }
+  }
+  return {};
+}
+
+function formats(...pairs: [string, string][]): MenuFormat[] {
+  return pairs.map(([label, price]) => ({ label, price }));
+}
+
+const burger = (burgerPrice: string, pain: string, mitraillette: string) =>
+  formats(["Burger", burgerPrice], ["Pain", pain], ["Mitraillette", mitraillette]);
+
+const snack = (viande: string, pain?: string, mitraillette?: string) => {
+  const rows: [string, string][] = [["Viande", viande]];
+  if (pain) rows.push(["Pain", pain]);
+  if (mitraillette) rows.push(["Mitraillette", mitraillette]);
+  return formats(...rows);
+};
+
 export const menuCategories: MenuCategoryData[] = [
   {
     id: "burgers",
-    label: "Burgers",
-    intro:
-      "Des burgers élaborés à base de produits frais issus de commerces locaux.",
+    label: "Burgers signatures",
     items: [
       {
-        id: "b-gaston",
-        name: "Le Gaston",
-        description:
-          "Pain brioché, steak de bœuf haché, fromage d'Abbaye, jambon d'Ardennes, crudités et sauce Gaston.",
-        price: "11,90 €",
-        tag: "Signature",
-        image: "/images/mr-gaston/gaston-plate.webp",
-        imageAlt: "Le Gaston : burger, frites et Kriek chez Mr Gaston à Mons",
-      },
-      {
-        id: "b-carcassonne",
-        name: "Le Carcassonne",
-        description:
-          "Pain brioché, steak de bœuf haché, chorizo, poivrons grillés, roquette et sauce Carcassonne.",
-        price: "11,90 €",
-      },
-      {
         id: "b-poivre",
-        name: "Le Poivre",
+        name: "Poivré",
         description:
-          "Pain brioché, steak de bœuf haché, cheddar vintage, lard grillé, crudités et sauce au poivre.",
+          "Burger de bœuf, sauce poivre, salade, chou, oignons rissolés, lard, cheddar vintage.",
         price: "11,90 €",
+        formats: burger("11,90 €", "11,90 €", "14,90 €"),
+        tag: "À découvrir",
+        featured: true,
+        ...dishImage(["poivre", "poivré"], "Burger Poivré de Mr Gaston"),
       },
       {
-        id: "b-longtarin",
-        name: "Le Longtarin",
+        id: "b-gaston",
+        name: "Gaston",
         description:
-          "Pain brioché, escalope de dinde panée, pancetta grillée, cheddar vintage, sauce Longtarin, salade et oignon rouge.",
+          "Burger de bœuf, sauce Gaston, salade, oignons secs, carottes, cornichon, fromage d'abbaye, jambon d'Ardenne.",
         price: "11,90 €",
+        formats: burger("11,90 €", "11,90 €", "14,90 €"),
+        ...dishImage(["gaston-plate", "gaston"], "Burger Gaston"),
       },
       {
         id: "b-abbe",
-        name: "L'Abbé",
+        name: "Abbé",
         description:
-          "Pain brioché, steak de bœuf haché, fromage de Chimay, crudités et sauce Gaston.",
+          "Burger de bœuf, sauce Gaston, salade, oignons secs, carottes, cornichon, fromage d'abbaye.",
         price: "10,90 €",
+        formats: burger("10,90 €", "10,90 €", "13,90 €"),
+        ...dishImage(["abbe", "abbé"], "Burger Abbé"),
       },
       {
-        id: "b-elementaire",
-        name: "L'élémentaire",
+        id: "b-longtarin",
+        name: "Longtarin",
         description:
-          "Pain brioché, steak de bœuf haché, crudités et sauce Gaston.",
-        price: "9,90 €",
-        image: "/images/mr-gaston/elementaire.webp",
-        imageAlt: "L'élémentaire : burger, frites et snacks chez Mr Gaston à Mons",
+          "Escalope de dinde, sauce Longtarin, salade, oignons rouges, lard, cheddar vintage.",
+        price: "11,90 €",
+        formats: burger("11,90 €", "11,90 €", "14,90 €"),
+        ...dishImage(["longtarin"], "Burger Longtarin"),
       },
       {
         id: "b-jeanne",
-        name: "Le M'zelle Jeanne",
+        name: "M'zelle Jeanne",
         description:
-          "Pain brioché, burger végétarien aux pois chiches, crudités et sauce Gaston.",
+          "Burger de pois chiches, sauce Gaston, salade, oignons secs, carottes, cornichon.",
         price: "9,90 €",
-        tag: "Végétarien",
+        formats: burger("9,90 €", "9,90 €", "12,90 €"),
         vegetarian: true,
+        ...dishImage(["jeanne", "mzelle-jeanne", "m-zelle-jeanne"], "Burger M'zelle Jeanne"),
+      },
+      {
+        id: "b-carcassonne",
+        name: "Carcassonne",
+        description: "Burger de bœuf, sauce Carcassonne, roquette, poivrons rouges, chorizo.",
+        price: "11,90 €",
+        formats: burger("11,90 €", "11,90 €", "14,90 €"),
+        ...dishImage(["carcassonne"], "Burger Carcassonne"),
+      },
+      {
+        id: "b-elementaire",
+        name: "Élémentaire",
+        description:
+          "Burger de bœuf, sauce Gaston, salade, oignons secs, carottes, cornichon.",
+        price: "9,90 €",
+        formats: burger("9,90 €", "9,90 €", "12,90 €"),
+        ...dishImage(["elementaire", "élémentaire"], "Burger Élémentaire"),
       },
       {
         id: "b-base",
-        name: "La Base",
-        description: "Pain brioché, steak de bœuf haché et sauce au choix.",
-        price: "6,50 €",
-      },
-    ],
-  },
-  {
-    id: "menus",
-    label: "Menus",
-    intro:
-      "Burger, petite portion de frites et une sauce au choix.",
-    items: [
-      {
-        id: "m-gaston",
-        name: "Gaston + frites",
-        description: "Le Gaston, petite frites et sauce au choix.",
-        price: "14,90 €",
-        tag: "Le plus demandé",
-        image: "/images/mr-gaston/gaston-plate.webp",
-        imageAlt: "Le Gaston : burger, frites et Kriek chez Mr Gaston à Mons",
-      },
-      {
-        id: "m-carcassonne",
-        name: "Carcassonne + frites",
-        description: "Le Carcassonne, petite frites et sauce au choix.",
-        price: "14,90 €",
-      },
-      {
-        id: "m-poivre",
-        name: "Poivre + frites",
-        description: "Le Poivre, petite frites et sauce au choix.",
-        price: "14,90 €",
-      },
-      {
-        id: "m-longtarin",
-        name: "Longtarin + frites",
-        description: "Le Longtarin, petite frites et sauce au choix.",
-        price: "14,90 €",
-      },
-      {
-        id: "m-abbe",
-        name: "L'Abbé + frites",
-        description: "L'Abbé, petite frites et sauce au choix.",
-        price: "13,40 €",
-      },
-      {
-        id: "m-elementaire",
-        name: "L'élémentaire + frites",
-        description: "L'élémentaire, petite frites et sauce au choix.",
-        price: "12,40 €",
-        image: "/images/mr-gaston/elementaire.webp",
-        imageAlt: "L'élémentaire : burger, frites et snacks chez Mr Gaston à Mons",
-      },
-      {
-        id: "m-jeanne",
-        name: "M'zelle Jeanne + frites",
-        description: "Le M'zelle Jeanne, petite frites et sauce au choix.",
-        price: "12,90 €",
-        vegetarian: true,
-      },
-      {
-        id: "m-base",
-        name: "La Base + frites",
-        description: "La Base, petite frites et sauce au choix.",
-        price: "9,50 €",
-      },
-      {
-        id: "m-enfant",
-        name: "Menu enfant",
-        description:
-          "Petite frite et sa sauce, un snack du boucher et une boisson. Moins de 10 ans.",
-        price: "9,90 €",
-        tag: "< 10 ans",
-      },
-      {
-        id: "m-gigaston",
-        name: "Le Gigaston",
-        description: "Le lundi et le mardi — la Giga Dalle de Mr Gaston.",
-        price: "20,00 €",
-        tag: "Lundi & mardi",
-      },
-    ],
-  },
-  {
-    id: "mitraillettes",
-    label: "Mitraillettes",
-    intro:
-      "Demi-baguette, belle portion de frites et une sauce au choix.",
-    items: [
-      {
-        id: "mi-gaston",
-        name: "Mitraillette Gaston",
-        description:
-          "Steak de bœuf haché, fromage d'Abbaye, jambon d'Ardennes, crudités et sauce Gaston.",
-        price: "13,90 €",
-        tag: "Maison",
-      },
-      {
-        id: "mi-carcassonne",
-        name: "Mitraillette Carcassonne",
-        description:
-          "Steak de bœuf haché, chorizo, poivrons grillés, roquette et sauce Carcassonne.",
-        price: "13,90 €",
-      },
-      {
-        id: "mi-poivre",
-        name: "Mitraillette Poivre",
-        description:
-          "Steak de bœuf haché, cheddar vintage, lard grillé, crudités et sauce au poivre.",
-        price: "13,90 €",
-      },
-      {
-        id: "mi-longtarin",
-        name: "Mitraillette Longtarin",
-        description:
-          "Escalope de dinde panée, pancetta, cheddar vintage, sauce Longtarin, salade et oignon rouge.",
-        price: "13,90 €",
-      },
-      {
-        id: "mi-abbe",
-        name: "Mitraillette Abbé",
-        description:
-          "Steak de bœuf haché, fromage de Chimay, crudités et sauce Gaston.",
-        price: "13,40 €",
-      },
-      {
-        id: "mi-elementaire",
-        name: "Mitraillette élémentaire",
-        description: "Steak de bœuf haché, crudités et sauce Gaston.",
-        price: "12,90 €",
-      },
-      {
-        id: "mi-jeanne",
-        name: "Mitraillette M'zelle Jeanne",
-        description: "Burger végétarien aux pois chiches, crudités et sauce Gaston.",
-        price: "12,90 €",
-        vegetarian: true,
-      },
-      {
-        id: "mi-base",
-        name: "Mitraillette La Base",
-        description: "Steak de bœuf haché et sauce au choix.",
-        price: "9,90 €",
-      },
-      {
-        id: "mi-boeuf",
-        name: "Mitraillette brochette de bœuf",
-        description: "Brochette de bœuf, salade, carottes râpées, oignons secs et cornichons.",
-        price: "9,50 €",
-      },
-      {
-        id: "mi-poulet",
-        name: "Mitraillette brochette de poulet",
-        description: "Brochette de poulet, salade, carottes râpées, oignons secs et cornichons.",
-        price: "9,50 €",
-      },
-      {
-        id: "mi-cervelas",
-        name: "Mitraillette cervelas cheval fumé",
-        description: "Cervelas de cheval, salade, carottes râpées, oignons secs et cornichons.",
-        price: "7,20 €",
-      },
-      {
-        id: "mi-boulette",
-        name: "Mitraillette boulette maison",
-        description: "Boulette maison, salade, carottes râpées, oignons secs et cornichons.",
+        name: "Base",
+        description: "Compose ton burger de bœuf.",
         price: "7,00 €",
+        formats: burger("7,00 €", "7,00 €", "10,00 €"),
+        note: "+ frites : 3,00 €",
+        ...dishImage(["base"], "Burger Base"),
       },
     ],
   },
   {
     id: "snacks",
     label: "Snacks",
-    intro: "Snacks préparés par nos bouchers partenaires.",
     items: [
       {
-        id: "s-boulette",
-        name: "Boulette maison",
-        description: "Préparée par notre partenaire boucher.",
-        price: "4,20 €",
-      },
-      {
-        id: "s-cervelas-cheval",
-        name: "Cervelas de cheval",
-        description: "Artisanat Boucherie ABC.",
-        price: "4,50 €",
-      },
-      {
-        id: "s-cervelas-porc",
-        name: "Cervelas de porc",
-        description: "Artisanat Boucherie ABC.",
-        price: "4,50 €",
-      },
-      {
-        id: "s-brochette-poulet",
-        name: "Brochette de poulet",
-        description: "Brochette marinée, Boucherie ABC.",
-        price: "4,50 €",
-      },
-      {
-        id: "s-brochette-boeuf",
-        name: "Brochette de bœuf",
-        description: "Brochette marinée, Boucherie ABC.",
-        price: "4,90 €",
-      },
-      {
-        id: "s-fricadelle",
-        name: "Fricadelle",
-        description: "Fritkot.",
-        price: "2,20 €",
+        id: "s-fricandelle",
+        name: "Fricandelle",
+        description: "",
+        price: "2,50 €",
+        formats: snack("2,50 €", "5,50 €", "8,50 €"),
       },
       {
         id: "s-poulycroc",
         name: "Poulycroc",
-        description: "Fritkot.",
+        description: "",
         price: "3,00 €",
+        formats: snack("3,00 €", "6,00 €", "9,00 €"),
       },
       {
         id: "s-mexicanos",
         name: "Mexicanos",
-        description: "Fritkot.",
+        description: "",
         price: "3,00 €",
+        formats: snack("3,00 €", "6,00 €", "9,00 €"),
+      },
+      {
+        id: "s-cervelas",
+        name: "Cervelas",
+        description: "",
+        price: "4,00 €",
+        formats: snack("4,00 €", "7,00 €", "10,00 €"),
       },
       {
         id: "s-nuggets",
-        name: "Nuggets",
-        description: "Fritkot.",
+        name: "Nuggets/Fingers",
+        description: "",
         price: "4,50 €",
+        formats: snack("4,50 €", "7,50 €", "10,50 €"),
       },
       {
-        id: "s-cervelas-chasseur",
-        name: "Cervelas chasseur",
-        description: "Fritkot.",
+        id: "s-viandelle",
+        name: "Viandelle",
+        description: "",
+        price: "3,00 €",
+        formats: snack("3,00 €", "6,00 €", "9,00 €"),
+      },
+      {
+        id: "s-cheese-crack",
+        name: "Cheese Crack",
+        description: "",
+        price: "3,00 €",
+        formats: snack("3,00 €", "6,00 €", "9,00 €"),
+      },
+      {
+        id: "s-brochette-porc",
+        name: "Brochette de porc",
+        description: "",
         price: "4,00 €",
+        formats: snack("4,00 €", "7,00 €", "10,00 €"),
       },
       {
-        id: "s-burger",
-        name: "Burger fritkot",
-        description: "Fritkot.",
-        price: "5,50 €",
+        id: "s-pilons",
+        name: "Pilons de poulet",
+        description: "",
+        price: "5,00 €",
+        formats: snack("5,00 €"),
+      },
+      {
+        id: "s-burger-porc",
+        name: "Burger de porc",
+        description: "",
+        price: "3,00 €",
+        formats: snack("3,00 €", "6,00 €", "9,00 €"),
       },
       {
         id: "s-burger-dinde",
-        name: "Burger dinde",
-        description: "Fritkot.",
-        price: "6,00 €",
+        name: "Burger de dinde",
+        description: "",
+        price: "3,00 €",
+        formats: snack("3,00 €", "6,00 €", "9,00 €"),
+      },
+      {
+        id: "s-ravier-kebab",
+        name: "Ravier kebab",
+        description: "",
+        price: "5,00 €",
+        formats: snack("5,00 €", "8,00 €", "11,00 €"),
+      },
+      {
+        id: "s-lucifer",
+        name: "Lucifer",
+        description: "",
+        price: "4,50 €",
+        formats: snack("4,50 €", "7,50 €", "10,50 €"),
+      },
+      {
+        id: "s-brochette-ardennaise",
+        name: "Brochette ardennaise",
+        description: "",
+        price: "4,00 €",
+        formats: snack("4,00 €", "7,00 €", "10,00 €"),
+      },
+    ],
+  },
+  {
+    id: "boucher",
+    label: "Snacks du boucher",
+    items: [
+      {
+        id: "sb-cervelas-cheval",
+        name: "Cervelas de cheval",
+        description: "",
+        price: "5,00 €",
+        formats: snack("5,00 €", "8,00 €", "11,00 €"),
+      },
+      {
+        id: "sb-brochette-boeuf",
+        name: "Brochette de bœuf",
+        description: "",
+        price: "5,00 €",
+        formats: snack("5,00 €", "8,00 €", "11,00 €"),
+      },
+      {
+        id: "sb-brochette-poulet",
+        name: "Brochette poulet",
+        description: "",
+        price: "5,00 €",
+        formats: snack("5,00 €", "8,00 €", "11,00 €"),
+      },
+      {
+        id: "sb-boulette",
+        name: "Boulette maison",
+        description: "",
+        price: "4,50 €",
+        formats: snack("4,50 €", "7,50 €", "10,50 €"),
       },
     ],
   },
   {
     id: "frites",
-    label: "Frites & sauces",
-    intro:
-      "Frites fraîches cuites dans une graisse de bœuf contrôlée quotidiennement.",
+    label: "Frites",
     items: [
-      { id: "f-petite", name: "Petite", description: "Portion de frites.", price: "3,00 €" },
-      { id: "f-grande", name: "Grande", description: "Portion de frites.", price: "4,00 €", tag: "Classique" },
-      {
-        id: "sa-gaston",
-        name: "Sauce Gaston",
-        description: "Mayo, cornichons, oignons, paprika, ail.",
-        price: "1,00 €",
-        tag: "Maison",
-      },
-      {
-        id: "sa-carcassonne",
-        name: "Sauce Carcassonne",
-        description: "Mayo, ail, thym et romarin.",
-        price: "1,00 €",
-        tag: "Maison",
-      },
-      {
-        id: "sa-longtarin",
-        name: "Sauce Longtarin",
-        description: "Mayo pimentée, paprika, ail.",
-        price: "1,00 €",
-        tag: "Maison",
-      },
-      { id: "sa-mayo", name: "Mayo", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-andalouse", name: "Andalouse", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-samourai", name: "Samouraï", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-brazil", name: "Brazil", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-poivre", name: "Sauce poivre", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-tartare", name: "Tartare", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-bbq", name: "Barbecue", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-aioli", name: "Aïoli", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-bearnaise", name: "Béarnaise", description: "Sauce.", price: "0,90 €" },
-      { id: "sa-truffe", name: "Mayo truffe", description: "Sauce.", price: "0,90 €" },
+      { id: "f-petite", name: "Petite", description: "", price: "3,50 €" },
+      { id: "f-grande", name: "Grande", description: "", price: "4,50 €" },
+      { id: "f-pain", name: "Pain frites", description: "", price: "6,50 €" },
+    ],
+  },
+  {
+    id: "sauces",
+    label: "Sauces",
+    items: [
+      { id: "sa-gaston", name: "Gaston", description: "", price: "1,00 €", tag: "Maison" },
+      { id: "sa-longtarin", name: "Longtarin", description: "", price: "1,00 €", tag: "Maison" },
+      { id: "sa-carcassonne", name: "Carcassonne", description: "", price: "1,00 €", tag: "Maison" },
+      { id: "sa-andalouse", name: "Andalouse", description: "", price: "0,90 €" },
+      { id: "sa-aioli", name: "Aioli", description: "", price: "0,90 €" },
+      { id: "sa-americaine", name: "Américaine douce/forte", description: "", price: "0,90 €" },
+      { id: "sa-algerienne", name: "Algérienne", description: "", price: "0,90 €" },
+      { id: "sa-bbq", name: "Barbecue", description: "", price: "0,90 €" },
+      { id: "sa-brazil", name: "Brazil", description: "", price: "0,90 €" },
+      { id: "sa-bicky", name: "Bicky 3", description: "", price: "0,90 €" },
+      { id: "sa-cocktail", name: "Cocktail", description: "", price: "0,90 €" },
+      { id: "sa-dallas", name: "Dallas", description: "", price: "0,90 €" },
+      { id: "sa-giant", name: "Giant", description: "", price: "0,90 €" },
+      { id: "sa-hannibal", name: "Hannibal", description: "", price: "0,90 €" },
+      { id: "sa-ketchup-curry", name: "Ketchup/curry", description: "", price: "0,90 €" },
+      { id: "sa-mayo-truffe", name: "Mayo/truffe", description: "", price: "0,90 €" },
+      { id: "sa-mannalouse", name: "Mannalouse", description: "", price: "0,90 €" },
+      { id: "sa-poivre", name: "Poivre", description: "", price: "0,90 €" },
+      { id: "sa-samourai", name: "Samourai", description: "", price: "0,90 €" },
+      { id: "sa-toscane", name: "Toscane", description: "", price: "0,90 €" },
+      { id: "sa-tartare", name: "Tartare", description: "", price: "0,90 €" },
+      { id: "sa-joppie", name: "Joppie", description: "", price: "0,90 €" },
+    ],
+  },
+  {
+    id: "supplements",
+    label: "Suppléments",
+    items: [
+      { id: "x-cheddar", name: "Cheddar", description: "", price: "1,00 €" },
+      { id: "x-cheddar-vintage", name: "Cheddar vintage", description: "", price: "2,00 €" },
+      { id: "x-feta", name: "Feta", description: "", price: "2,00 €" },
+      { id: "x-abbaye", name: "Fromage d'abbaye", description: "", price: "2,00 €" },
+      { id: "x-jambon", name: "Jambon d'Ardenne", description: "", price: "2,00 €" },
+      { id: "x-lard", name: "Lard", description: "", price: "2,00 €" },
+      { id: "x-chorizo", name: "Chorizo", description: "", price: "2,00 €" },
+      { id: "x-salade", name: "Salade", description: "", price: "0,70 €" },
+      { id: "x-roquette", name: "Roquette", description: "", price: "0,80 €" },
+      { id: "x-chou", name: "Chou", description: "", price: "0,80 €" },
+      { id: "x-carotte", name: "Carotte", description: "", price: "0,70 €" },
+      { id: "x-tomate", name: "Tomate", description: "", price: "0,70 €" },
+      { id: "x-oignons-frais", name: "Oignons frais", description: "", price: "0,70 €" },
+      { id: "x-oignons-rissoles", name: "Oignons rissolés", description: "", price: "1,00 €" },
+      { id: "x-oignons-secs", name: "Oignons secs", description: "", price: "0,70 €" },
+      { id: "x-cornichon", name: "Cornichon", description: "", price: "0,70 €" },
+      { id: "x-poivron", name: "Poivron rouge", description: "", price: "0,70 €" },
+      { id: "x-double-porc", name: "Double viande burger porc", description: "", price: "3,00 €" },
+      { id: "x-double-dinde", name: "Double viande burger dinde", description: "", price: "3,00 €" },
+      { id: "x-double-boeuf", name: "Double viande burger bœuf", description: "", price: "4,00 €" },
+      { id: "x-frites", name: "Frites", description: "", price: "3,00 €" },
+      { id: "x-baguette", name: "Baguette", description: "", price: "2,00 €" },
+      { id: "x-vidange", name: "Vidange", description: "", price: "1,00 €" },
     ],
   },
   {
@@ -384,19 +355,19 @@ export const menuCategories: MenuCategoryData[] = [
     label: "Au bar",
     intro: "Softs, eaux et une sélection de bières locales.",
     items: [
-      { id: "d-jupiler", name: "Jupiler 33 cl", description: "Bière.", price: "2,50 €" },
-      { id: "d-vedett", name: "Vedett IPA", description: "Bière.", price: "4,50 €" },
+      { id: "d-jupiler", name: "Jupiler 33 cl", description: "", price: "2,50 €" },
+      { id: "d-vedett", name: "Vedett IPA", description: "", price: "4,50 €" },
       { id: "d-orval", name: "Orval", description: "Bière d'abbaye.", price: "5,00 €" },
-      { id: "d-duvel", name: "Duvel", description: "Bière.", price: "4,80 €" },
+      { id: "d-duvel", name: "Duvel", description: "", price: "4,80 €" },
       { id: "d-chimay", name: "Chimay Dorée", description: "Bière d'abbaye.", price: "4,00 €" },
-      { id: "d-liefmans", name: "Liefmans", description: "Bière.", price: "4,50 €" },
+      { id: "d-liefmans", name: "Liefmans", description: "", price: "4,50 €" },
       { id: "d-jup0", name: "Jupiler 0%", description: "Bière sans alcool.", price: "2,50 €" },
       { id: "d-coca", name: "Coca-Cola", description: "Regular ou zéro.", price: "2,50 €" },
-      { id: "d-fanta", name: "Fanta orange", description: "Soft.", price: "2,50 €" },
-      { id: "d-sprite", name: "Sprite", description: "Soft.", price: "2,50 €" },
-      { id: "d-tropico", name: "Tropico", description: "Soft.", price: "2,50 €" },
-      { id: "d-capri", name: "Capri-Sun", description: "Soft.", price: "2,00 €" },
-      { id: "d-eau", name: "Eau plate ou pétillante", description: "Soft.", price: "2,00 €" },
+      { id: "d-fanta", name: "Fanta orange", description: "", price: "2,50 €" },
+      { id: "d-sprite", name: "Sprite", description: "", price: "2,50 €" },
+      { id: "d-tropico", name: "Tropico", description: "", price: "2,50 €" },
+      { id: "d-capri", name: "Capri-Sun", description: "", price: "2,00 €" },
+      { id: "d-eau", name: "Eau plate ou pétillante", description: "", price: "2,00 €" },
     ],
   },
 ];
@@ -410,6 +381,5 @@ export function displayDescription(description: string) {
 
 export function menuBadge(item: MenuItem) {
   if (item.tag) return item.tag;
-  if (item.vegetarian) return "Végétarien";
   return undefined;
 }
