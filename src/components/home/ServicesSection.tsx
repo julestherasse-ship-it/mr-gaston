@@ -10,47 +10,50 @@ import MenuDishCard from "@/components/home/MenuDishCard";
 import MenuDishRow from "@/components/home/MenuDishRow";
 import MenuPortionCard from "@/components/home/MenuPortionCard";
 
-function BurgersBlock({ items }: { items: MenuItem[] }) {
-  const featured = items.find((item) => item.featured) ?? items[0];
-  const rest = featured ? items.filter((item) => item.id !== featured.id) : items;
+/** Already given a dedicated visual moment above the carte. */
+const HERO_FEATURED = new Set(["b-poivre", "b-gaston"]);
+/** Official photos still shown in the carte — compact editorial rhythm. */
+const PHOTO_SIGNATURES = new Set(["b-abbe", "b-longtarin", "b-jeanne"]);
 
-  type Run = { type: "photo" | "list"; items: MenuItem[] };
-  const runs: Run[] = [];
-  for (const item of rest) {
-    const type = item.image ? "photo" : "list";
-    const last = runs[runs.length - 1];
-    if (last && last.type === type) last.items.push(item);
-    else runs.push({ type, items: [item] });
+function BurgersBlock({ items }: { items: MenuItem[] }) {
+  const photoSignatures: MenuItem[] = [];
+  const listItems: MenuItem[] = [];
+
+  for (const item of items) {
+    if (PHOTO_SIGNATURES.has(item.id) && item.image) {
+      photoSignatures.push(item);
+    } else {
+      listItems.push(item);
+    }
   }
 
   return (
-    <>
-      {featured ? (
-        <div className="mb-10 md:mb-14">
-          <MenuDishCard item={featured} featured />
+    <div className="space-y-14 md:space-y-16 lg:space-y-20">
+      {photoSignatures.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6 lg:gap-8">
+          {photoSignatures.map((item) => (
+            <MenuDishCard key={item.id} item={item} stacked compact />
+          ))}
         </div>
       ) : null}
-      {runs.map((run, index) =>
-        run.type === "photo" ? (
-          <div
-            key={`photo-${run.items[0]?.id ?? index}`}
-            className={`grid grid-cols-1 gap-6 md:gap-8 mb-6 md:mb-10 ${
-              run.items.length > 1 ? "md:grid-cols-2" : ""
-            }`}
-          >
-            {run.items.map((item) => (
-              <MenuDishCard key={item.id} item={item} />
-            ))}
-          </div>
-        ) : (
-          <ul key={`list-${run.items[0]?.id ?? index}`} className="mb-6 md:mb-10 last:mb-0">
-            {run.items.map((item) => (
-              <MenuDishRow key={item.id} item={item} />
+
+      {listItems.length > 0 ? (
+        <div>
+          {photoSignatures.length > 0 ? (
+            <p className="eyebrow text-cream/55 mb-5">Aussi en carte</p>
+          ) : null}
+          <ul>
+            {listItems.map((item) => (
+              <MenuDishRow
+                key={item.id}
+                item={item}
+                compact={HERO_FEATURED.has(item.id)}
+              />
             ))}
           </ul>
-        ),
-      )}
-    </>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -100,6 +103,7 @@ export default function ServicesSection() {
                       alt="Carte du bar — softs et bières chez Mr Gaston à Mons"
                       fill
                       sizes="(max-width: 1024px) 100vw, 88vw"
+                      quality={90}
                       className="object-contain p-3 md:p-6"
                     />
                   </div>

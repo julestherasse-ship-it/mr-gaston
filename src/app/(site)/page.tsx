@@ -1,4 +1,5 @@
 import Hero from "@/components/home/Hero";
+import GastonSection from "@/components/home/GastonSection";
 import TrustBar from "@/components/home/TrustBar";
 import HeritageSection from "@/components/home/HeritageSection";
 import ServicesSection from "@/components/home/ServicesSection";
@@ -16,6 +17,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: restaurantJsonLdScript }}
       />
       <Hero />
+      <GastonSection />
       <TrustBar />
       <ServicesSection />
       <HeritageSection />

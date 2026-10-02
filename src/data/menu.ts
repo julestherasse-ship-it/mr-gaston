@@ -27,6 +27,7 @@ export interface MenuItem {
   image?: string;
   imageAlt?: string;
   featured?: boolean;
+  imagePosition?: string;
 }
 
 export interface MenuCategoryData {
@@ -36,15 +37,32 @@ export interface MenuCategoryData {
   items: MenuItem[];
 }
 
-const IMAGE_DIR = join(process.cwd(), "public", "images", "mr-gaston");
+function officialDishPath(filename: string) {
+  const absolute = join(process.cwd(), "public", "images", "burgers", filename);
+  return existsSync(/*turbopackIgnore: true*/ absolute) ? `/images/burgers/${filename}` : undefined;
+}
 
-function dishImage(stems: string[], alt: string): Pick<MenuItem, "image" | "imageAlt"> {
-  const extensions = [".webp", ".jpg", ".jpeg", ".png"];
+function archiveDishPath(filename: string) {
+  const absolute = join(process.cwd(), "public", "images", "mr-gaston", filename);
+  return existsSync(/*turbopackIgnore: true*/ absolute) ? `/images/mr-gaston/${filename}` : undefined;
+}
+
+function dishImage(
+  stems: string[],
+  alt: string,
+  imagePosition?: string,
+): Pick<MenuItem, "image" | "imageAlt" | "imagePosition"> {
+  const extensions = [".jpg", ".jpeg", ".webp", ".png"];
   for (const stem of stems) {
     for (const ext of extensions) {
       const filename = `${stem}${ext}`;
-      if (existsSync(join(IMAGE_DIR, filename))) {
-        return { image: `/images/mr-gaston/${filename}`, imageAlt: alt };
+      const image = officialDishPath(filename) ?? archiveDishPath(filename);
+      if (image) {
+        return {
+          image,
+          imageAlt: alt,
+          ...(imagePosition ? { imagePosition } : {}),
+        };
       }
     }
   }
@@ -79,7 +97,7 @@ export const menuCategories: MenuCategoryData[] = [
         formats: burger("11,90 €", "11,90 €", "14,90 €"),
         tag: "À découvrir",
         featured: true,
-        ...dishImage(["poivre", "poivré"], "Burger Poivré de Mr Gaston"),
+        ...dishImage(["poivre", "poivré"], "Burger Poivré de Mr Gaston", "50% 78%"),
       },
       {
         id: "b-gaston",
@@ -88,7 +106,7 @@ export const menuCategories: MenuCategoryData[] = [
           "Burger de bœuf, sauce Gaston, salade, oignons secs, carottes, cornichon, fromage d'abbaye, jambon d'Ardenne.",
         price: "11,90 €",
         formats: burger("11,90 €", "11,90 €", "14,90 €"),
-        ...dishImage(["gaston-plate", "gaston"], "Burger Gaston"),
+        ...dishImage(["gaston", "gaston-plate"], "Burger Gaston de Mr Gaston", "50% 76%"),
       },
       {
         id: "b-abbe",
@@ -97,7 +115,7 @@ export const menuCategories: MenuCategoryData[] = [
           "Burger de bœuf, sauce Gaston, salade, oignons secs, carottes, cornichon, fromage d'abbaye.",
         price: "10,90 €",
         formats: burger("10,90 €", "10,90 €", "13,90 €"),
-        ...dishImage(["abbe", "abbé"], "Burger Abbé"),
+        ...dishImage(["abbe", "abbé"], "Burger Abbé de Mr Gaston", "50% 76%"),
       },
       {
         id: "b-longtarin",
@@ -106,7 +124,7 @@ export const menuCategories: MenuCategoryData[] = [
           "Escalope de dinde, sauce Longtarin, salade, oignons rouges, lard, cheddar vintage.",
         price: "11,90 €",
         formats: burger("11,90 €", "11,90 €", "14,90 €"),
-        ...dishImage(["longtarin"], "Burger Longtarin"),
+        ...dishImage(["longtarin"], "Burger Longtarin de Mr Gaston", "50% 74%"),
       },
       {
         id: "b-jeanne",
@@ -116,7 +134,7 @@ export const menuCategories: MenuCategoryData[] = [
         price: "9,90 €",
         formats: burger("9,90 €", "9,90 €", "12,90 €"),
         vegetarian: true,
-        ...dishImage(["jeanne", "mzelle-jeanne", "m-zelle-jeanne"], "Burger M'zelle Jeanne"),
+        ...dishImage(["mzelle-jeanne", "jeanne", "m-zelle-jeanne"], "Burger M'Zelle Jeanne de Mr Gaston", "48% 76%"),
       },
       {
         id: "b-carcassonne",

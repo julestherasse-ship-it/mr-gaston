@@ -1,5 +1,7 @@
 export const images = {
   hero: "/images/mr-gaston/hero-plate.webp",
+  poivre: "/images/burgers/poivre.jpg",
+  gaston: "/images/burgers/gaston.jpg",
   gastonPlate: "/images/mr-gaston/gaston-plate.webp",
   elementaire: "/images/mr-gaston/elementaire.webp",
   burger: "/images/mr-gaston/burger.webp",

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { headerNav, siteConfig } from "@/data/site";
 import { images } from "@/data/images";
@@ -18,6 +19,8 @@ function setInert(node: Element | null, value: boolean) {
 }
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const onHome = pathname === "/";
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string | null>(null);
@@ -145,17 +148,22 @@ export default function Navbar() {
   }, [scrolled, open]);
 
   const elevated = scrolled || open;
+  const overHero = onHome && !elevated;
 
   return (
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 inset-x-0 z-50 border-b transition-[background-color,backdrop-filter,border-color,box-shadow,padding] duration-[var(--duration)] ease-[var(--ease-out)] ${
+        className={`site-header fixed top-0 inset-x-0 z-50 border-b transition-[background-color,backdrop-filter,border-color,box-shadow,padding] duration-[var(--duration)] ease-[var(--ease-out)] ${
           elevated
-            ? "bg-night/94 backdrop-blur-md border-gold/14 shadow-[0_12px_40px_rgba(0,0,0,0.28)] pb-2.5 lg:py-3"
-            : "bg-transparent border-transparent shadow-none pb-3.5 lg:py-5"
+            ? "site-header--elevated bg-night/94 backdrop-blur-md border-gold/14 shadow-[0_12px_40px_rgba(0,0,0,0.28)] pb-2.5 lg:py-3"
+            : overHero
+              ? "site-header--over-hero bg-transparent border-transparent shadow-none pb-4 lg:py-6"
+              : "bg-transparent border-transparent shadow-none pb-3.5 lg:py-5"
         }`}
-        style={{ paddingTop: `calc(${elevated ? "0.55rem" : "0.85rem"} + env(safe-area-inset-top, 0px))` }}
+        style={{
+          paddingTop: `calc(${elevated ? "0.55rem" : overHero ? "1rem" : "0.85rem"} + env(safe-area-inset-top, 0px))`,
+        }}
       >
         <nav aria-label="Navigation principale" className="relative z-50 page-shell flex items-center justify-between gap-4 min-w-0">
           <Link
@@ -176,7 +184,7 @@ export default function Navbar() {
               fetchPriority="low"
               decoding="async"
               className={`object-contain w-auto origin-left transition-[height] duration-[var(--duration)] ease-[var(--ease-out)] ${
-                elevated ? "h-10 md:h-11" : "h-11 md:h-12"
+                elevated ? "h-10 md:h-11" : overHero ? "h-12 md:h-[3.25rem]" : "h-11 md:h-12"
               }`}
             />
           </Link>
