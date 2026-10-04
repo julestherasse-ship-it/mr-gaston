@@ -23,7 +23,7 @@ const weekday = (open: string, close: string): OpeningSlot[] => [
 ];
 
 export const openingHours: OpeningDay[] = [
-  { day: "Lundi", dayOfWeek: "Monday", closed: false, slots: weekday("18:00", "21:00") },
+  { day: "Lundi", dayOfWeek: "Monday", closed: true, slots: [] },
   { day: "Mardi", dayOfWeek: "Tuesday", closed: false, slots: weekday("18:00", "21:00") },
   { day: "Mercredi", dayOfWeek: "Wednesday", closed: false, slots: weekday("18:00", "21:00") },
   { day: "Jeudi", dayOfWeek: "Thursday", closed: false, slots: weekday("18:00", "21:00") },
@@ -51,13 +51,15 @@ export function getTodayHours() {
   const minutes = hour * 60 + minute;
   const row =
     openingHours.find((d) => d.dayOfWeek === weekdayName) ?? openingHours[0];
-  const open = row.slots.some((slot) => {
-    const [sh, sm] = slot.open.split(":").map(Number);
-    const [eh, em] = slot.close.split(":").map(Number);
-    const start = sh * 60 + sm;
-    const end = eh * 60 + em;
-    return minutes >= start && minutes < end;
-  });
+  const open =
+    !row.closed &&
+    row.slots.some((slot) => {
+      const [sh, sm] = slot.open.split(":").map(Number);
+      const [eh, em] = slot.close.split(":").map(Number);
+      const start = sh * 60 + sm;
+      const end = eh * 60 + em;
+      return minutes >= start && minutes < end;
+    });
   return {
     day: row.day,
     label: formatSlots(row),

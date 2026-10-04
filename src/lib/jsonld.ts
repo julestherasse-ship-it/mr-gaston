@@ -107,6 +107,8 @@ const localBusiness = {
   "@id": businessId,
   name: siteConfig.name,
   alternateName: siteConfig.nameDisplay,
+  legalName: siteConfig.legalName,
+  taxID: siteConfig.bceNumber,
   description: siteConfig.description,
   slogan: siteConfig.tagline,
   inLanguage: "fr-BE",

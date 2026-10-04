@@ -8,7 +8,7 @@ export const siteConfig = {
   seoTitle: "Mr Gaston — Friterie artisanale à Mons",
   ogTitle: "Mr Gaston — Des frites & des burgers à Mons",
   ogImageAlt: "Burger, frites et Kriek chez Mr Gaston à Mons",
-  contentUpdated: "2026-09-21",
+  contentUpdated: "2026-10-04",
   aboutLead:
     "Bienvenue chez Mr Gaston, la friterie artisanale incontournable située à Mons, Belgique.",
   aboutBody:
@@ -39,7 +39,9 @@ export const siteConfig = {
   fullAddress: "Chaussée de Binche 141, 7000 Mons, Belgique",
   phone: "0470 74 03 59",
   phoneHref: "+32470740359",
-  email: "info@mrgaston.be",
+  email: "info@monsieur-gaston.be",
+  legalName: "J.C.J.D SRL",
+  bceNumber: "1036.078.477",
   orderUrl:
     "https://www.foodbooking.com/ordering/restaurant/menu?restaurant_uid=3a126945-7b79-45f8-9e01-97eafbaca25b",
   website: "https://mrgaston.be/",

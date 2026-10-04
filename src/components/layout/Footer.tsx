@@ -47,14 +47,16 @@ export default function Footer() {
                 <li key={h.day} className="text-sm flex justify-between gap-3 py-1.5 items-baseline">
                   <span className="text-cream shrink-0">{h.day}</span>
                   <span className="text-cream/62 text-right min-w-0 price">
-                    {h.slots.map((slot, index) => (
-                      <span key={`${h.day}-${slot.open}`}>
-                        {index > 0 ? " / " : ""}
-                        <time dateTime={slot.open}>{slot.open}</time>
-                        –
-                        <time dateTime={slot.close}>{slot.close}</time>
-                      </span>
-                    ))}
+                    {h.closed
+                      ? "Fermé"
+                      : h.slots.map((slot, index) => (
+                          <span key={`${h.day}-${slot.open}`}>
+                            {index > 0 ? " / " : ""}
+                            <time dateTime={slot.open}>{slot.open}</time>
+                            –
+                            <time dateTime={slot.close}>{slot.close}</time>
+                          </span>
+                        ))}
                   </span>
                 </li>
               ))}
@@ -127,7 +129,14 @@ export default function Footer() {
         <div className="rule-light my-12 md:my-14" />
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 eyebrow text-cream/62">
-          <p>© 2026 {siteConfig.name} · Mons</p>
+          <div className="space-y-1">
+            <p>
+              © 2026 {siteConfig.name} · {siteConfig.legalName} · BCE {siteConfig.bceNumber}
+            </p>
+            <p className="normal-case tracking-normal font-normal text-cream/48">
+              {siteConfig.fullAddress}
+            </p>
+          </div>
           <TextLink href={`tel:${siteConfig.phoneHref}`} className="hover:text-cream">
             {siteConfig.phone}
           </TextLink>
