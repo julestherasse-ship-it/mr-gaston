@@ -25,8 +25,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         `${origin}${images.elementaire}`,
         `${origin}${images.burger}`,
         `${origin}${images.slider}`,
-        `${origin}${images.maison}`,
-        `${origin}${images.bar}`,
       ],
     },
   ];

@@ -119,8 +119,6 @@ const localBusiness = {
     `${origin}${images.elementaire}`,
     `${origin}${images.burger}`,
     `${origin}${images.slider}`,
-    `${origin}${images.maison}`,
-    `${origin}${images.bar}`,
   ],
   logo: { "@id": logoId },
   url: pageUrl,

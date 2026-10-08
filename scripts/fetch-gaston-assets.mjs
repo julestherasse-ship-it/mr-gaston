@@ -21,9 +21,7 @@ const files = [
     "https://mrgaston.be/wp-content/uploads/2024/11/elementaire_frite_poulycroc_coca_biere-scaled.jpg",
     "public/images/mr-gaston/elementaire.jpg",
   ],
-  ["https://mrgaston.be/wp-content/uploads/2025/06/maison25.png", "public/images/mr-gaston/maison25.png"],
   ["https://mrgaston.be/wp-content/uploads/2025/06/friture-0525.jpg", "public/images/mr-gaston/friture.jpg"],
-  ["https://mrgaston.be/wp-content/uploads/2025/06/bar25.jpg", "public/images/mr-gaston/bar.jpg"],
   [
     "https://mrgaston.be/wp-content/uploads/2024/06/BG-slider-gastonPlan-de-travail-1-1.png",
     "public/images/mr-gaston/slider-bg.png",

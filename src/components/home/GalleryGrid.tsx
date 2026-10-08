@@ -18,11 +18,6 @@ const layout: Record<(typeof galleryImages)[number]["span"], { col: string; min:
     min: "min-h-[62vw] sm:min-h-[56vw] md:min-h-[480px] lg:min-h-[540px]",
     sizes: "(max-width: 768px) 100vw, 34vw",
   },
-  wide: {
-    col: "md:col-span-6",
-    min: "min-h-[56vw] sm:min-h-[48vw] md:min-h-[340px] lg:min-h-[400px]",
-    sizes: "(max-width: 768px) 100vw, 50vw",
-  },
 };
 
 export default function GalleryGrid() {

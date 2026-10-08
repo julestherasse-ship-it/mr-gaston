@@ -1,9 +1,7 @@
 import { menuCategories, type MenuItem } from "@/data/menu";
 import { siteConfig } from "@/data/site";
-import { images } from "@/data/images";
 import SectionIndex from "@/components/ui/SectionIndex";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import SmartImage from "@/components/ui/SmartImage";
 import PremiumButton from "@/components/ui/PremiumButton";
 import MenuCategoryNav from "@/components/home/MenuCategoryNav";
 import MenuDishCard from "@/components/home/MenuDishCard";
@@ -95,19 +93,6 @@ export default function ServicesSection() {
                   <h3 className="font-display text-[clamp(2rem,4.8vw,3.4rem)] mb-4">{category.label}</h3>
                   {category.intro ? <p className="body-copy text-cream/72">{category.intro}</p> : null}
                 </header>
-
-                {category.id === "bar" ? (
-                  <div className="relative aspect-[16/9] min-h-[180px] md:min-h-[240px] mb-10 md:mb-12 border border-gold/14 bg-soot">
-                    <SmartImage
-                      src={images.bar}
-                      alt="Carte du bar — softs et bières chez Mr Gaston à Mons"
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 88vw"
-                      quality={90}
-                      className="object-contain p-3 md:p-6"
-                    />
-                  </div>
-                ) : null}
 
                 {category.id === "burgers" ? (
                   <BurgersBlock items={category.items} />
