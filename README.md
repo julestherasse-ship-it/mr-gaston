@@ -24,19 +24,32 @@ npm run build
 npm start
 ```
 
-## GitHub → Vercel
+## GitHub → Netlify (cible client)
+
+1. Transférer ou forker le dépôt `mr-gaston` vers le compte GitHub du client (voir procédure de transfert ci-dessous).
+2. Sur Netlify (compte client) : **Add new site → Import an existing project → GitHub**.
+3. Choisir le dépôt `mr-gaston`, branche `main`.
+4. Framework : **Next.js** (détection automatique + adapter OpenNext).
+5. Build command : `npm run build` (déjà dans `netlify.toml`) · Node : **20**.
+6. Aucune variable n’est obligatoire pour afficher le site.
+7. Déployer. Vérifier l’URL `*.netlify.app` avant tout changement DNS.
+
+Les previews Netlify (`CONTEXT=deploy-preview` / `branch-deploy`) restent en `noindex`. Seul `CONTEXT=production` est indexable.
+
+## GitHub → Vercel (déploiement actuel Aurelis — à conserver pendant la transition)
 
 1. Pousser le dépôt sur GitHub.
 2. Importer le projet dans Vercel (Framework Preset : **Next.js**, détection automatique).
 3. Build Command : `npm run build` · Output : géré par Next.js · Node : **20** (`.nvmrc`).
 4. Aucune variable n’est obligatoire : le site se construit et s’affiche sans elles.
-5. Ne pas déployer depuis cet environnement local — le premier déploiement se fait depuis le dashboard Vercel après le push GitHub.
 
 Les previews Vercel (`VERCEL_ENV=preview`) restent en `noindex`. Seul le déploiement de production est indexable.
 
+**Ne pas supprimer le projet Vercel** tant que le DNS / la validation client sur Netlify n’est pas terminée.
+
 ## Variables d'environnement (optionnelles)
 
-À définir dans Vercel → Settings → Environment Variables si besoin. Les valeurs `NEXT_PUBLIC_*` doivent être présentes **au moment du build**.
+À définir dans Netlify ou Vercel → Environment Variables si besoin. Les valeurs `NEXT_PUBLIC_*` doivent être présentes **au moment du build**.
 
 | Nom | Rôle | Obligatoire |
 | --- | --- | --- |
@@ -45,8 +58,8 @@ Les previews Vercel (`VERCEL_ENV=preview`) restent en `noindex`. Seul le déploi
 | `NEXT_PUBLIC_GTM_ID` | Conteneur Google Tag Manager (`GTM-…`). Prioritaire. Événements via `dataLayer`. | Non |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 direct (`G-…`), seulement si GTM n’est pas défini | Non |
 
-Les scripts GTM/GA4 ne se chargent que sur le déploiement de production (`VERCEL_ENV=production`). Aucune donnée personnelle n’est envoyée (pas d’URL `tel:`, pas d’e-mail, pas de query string).
+Les scripts GTM/GA4 ne se chargent que sur un déploiement **indexable** (production). Aucune donnée personnelle n’est envoyée (pas d’URL `tel:`, pas d’e-mail, pas de query string).
 
 Événements : `click_phone`, `click_directions`, `click_order`, `click_menu`, `click_social`, `click_location`, `click_email`. Paramètres : `placement`, `cta` (`primary` \| `secondary`), `network`, `path`. Pas de formulaire sur le site — `form_submit` n’est prévu que si un formulaire est ajouté plus tard.
 
-Vercel injecte déjà `VERCEL_ENV` et `NODE_ENV` : ne pas les inventer ni les recopier.
+Plateformes : Vercel injecte `VERCEL_ENV` · Netlify injecte `CONTEXT` · les deux injectent `NODE_ENV`. Ne pas les inventer ni les committer.

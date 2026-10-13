@@ -1,0 +1,13 @@
+# Netlify — Mr Gaston (Next.js App Router)
+# Adapter OpenNext injecté automatiquement : ne pas pinner @netlify/plugin-nextjs
+# sauf besoin exceptionnel.
+
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # NEXT_PUBLIC_* à définir dans Netlify UI (Site settings → Environment variables)
+  # si besoin. Aucune n'est obligatoire pour que le site s'affiche.
+
+# Ne pas définir "publish" manuellement pour Next.js : l'adapter gère la sortie.

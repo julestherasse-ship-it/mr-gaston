@@ -12,6 +12,19 @@ export function getSiteOrigin() {
 
 export function isIndexableDeployment() {
   if (process.env.NODE_ENV !== "production") return false;
-  const env = process.env.VERCEL_ENV;
-  return env !== "preview" && env !== "development";
+
+  // Vercel injects VERCEL_ENV; Netlify injects CONTEXT.
+  const vercelEnv = process.env.VERCEL_ENV;
+  if (vercelEnv === "preview" || vercelEnv === "development") return false;
+
+  const netlifyContext = process.env.CONTEXT;
+  if (
+    netlifyContext === "deploy-preview" ||
+    netlifyContext === "branch-deploy" ||
+    netlifyContext === "dev"
+  ) {
+    return false;
+  }
+
+  return true;
 }
